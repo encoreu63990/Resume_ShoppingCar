@@ -1,0 +1,72 @@
+﻿@model IEnumerable<ShoppingCar.Models.Product>
+
+@{
+    ViewBag.Title = "Products";
+}
+
+<h2>@ViewBag.Title</h2>
+@*<hr />*@
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-lg-4">
+            <div class="thumbnail">
+                <img src="~/Images/@item.Image" style="width:70%" />
+                <div class="caption">
+                    <h2>@item.Name</h2>
+                    <p>單價: @item.Price</p>
+                    @if (ShoppingCar.Models.LoginInfo.Customer == null && false)
+                    {
+                        <p></p>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary btn-add-product" data-id="@item.Id">加入購物車</button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            // Settings
+            toastr.options = {
+                timeOut: 1500,
+                newestOnTop: false
+            }
+
+            var buttons = {
+                addProduct: $('.btn-add-product')
+            };
+
+            buttons.addProduct.click(AddProduct);
+
+            function AddProduct(e) {
+                var productId = $(e.target).data('id');
+
+                $.ajax({
+                    url: '/Home/AddProduct',
+                    type: 'POST',
+                    data: {
+                        productId
+                    }
+                })
+                    .done(function (data) {
+                        toastr.success(productId + '加入成功');
+                    })
+                    .fail(function (xhr) {
+                        console.log(xhr);
+                        if (xhr.status == 403) {
+                            var response = $.parseJSON(xhr.responseText);
+                            window.location = response.LoginUrl;
+                        }
+                    });
+
+            }
+        });
+    </script>
+}

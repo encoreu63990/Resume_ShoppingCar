@@ -1,0 +1,124 @@
+﻿@model ShoppingCar.ViewModels.ShoppingCarViewModel
+@{
+    ViewBag.Title = "ShoppingCar";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<table id="table-order-detail" class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDetails.First().ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDetails.First().Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDetails.First().Quantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        @foreach (var item in Model.OrderDetails)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-remove-shopping-car-product" data-id="@item.Id">刪除</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@using (Html.BeginForm())
+{
+    <div class="form-horizontal">
+        <h4>填寫訂單收件人資料</h4>
+        <hr />
+
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(c => Model.Recipient.Name, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(c => c.Recipient.Name, new { @class = "form-control", required = "required" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(c => Model.Recipient.Email, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @*@Html.TextBoxFor(c => c.Recipient.Email, new { @class = "form-control", required = "required" })*@
+                @Html.EditorFor(model => model.Recipient.Email, new { htmlAttributes = new { @class = "form-control", required = "required" } })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(c => Model.Recipient.Address, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(c => c.Recipient.Address, new { @class = "form-control", required = "required" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" id="btn-confirm-order" value="確認訂購" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            var buttons = {
+                removeShoppingCarProduct: $('.btn-remove-shopping-car-product'),
+                confirmOrder: $('#btn-confirm-order')
+            };
+            var tbody = $('#table-order-detail tbody');
+
+            buttons.removeShoppingCarProduct.click(RemoveShoppingCarProduct);
+            buttons.confirmOrder.click(ConfirmOrder);
+
+            function RemoveShoppingCarProduct(e) {
+                var orderDetailId = $(e.target).data('id');
+                $.ajax({
+                    url: '/Home/RemoveShoppingCarProduct',
+                    data: { orderDetailId }
+                })
+                    .done(function () {
+                        var row = $(e.target).closest('tr').remove();
+                        toastr.success('刪除成功');
+                    })
+                    .fail(function (xhr) {
+                        console.log(xhr);
+                        if (xhr.status == 403) {
+                            var response = $.parseJSON(xhr.responseText);
+                            window.location = response.LoginUrl;
+                        }
+                    });
+            }
+
+            function ConfirmOrder(e) {
+                var length = tbody.find('tr').length;
+                console.log(length);
+                if (length == 0) {
+                    toastr.error('購物車沒有商品');
+                    return false;
+                }
+            }
+        });
+    </script>
+}

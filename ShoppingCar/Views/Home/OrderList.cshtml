@@ -1,0 +1,35 @@
+﻿@model IEnumerable<ShoppingCar.Models.Order>
+@{
+    ViewBag.Title = "OrderList";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.OrderGuid)</th>
+            <th>@Html.DisplayNameFor(model => model.RecipientName)</th>
+            <th> @Html.DisplayNameFor(model => model.RecipientEmail)</th>
+            <th>@Html.DisplayNameFor(model => model.RecipientAddress)</th>
+            <th>@Html.DisplayNameFor(model => model.Date)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th>
+                    <a href="@Url.Action("OrderDetail")?OrderGuid=@item.OrderGuid">
+                        @Html.DisplayFor(modelItem => item.OrderGuid)
+                    </a>
+                </th>
+                <th>@Html.DisplayFor(modelItem => item.RecipientName)</th>
+                <th>@Html.DisplayFor(modelItem => item.RecipientEmail)</th>
+                <th>@Html.DisplayFor(modelItem => item.RecipientAddress)</th>
+                <th>@Html.DisplayFor(modelItem => item.Date)</th>
+            </tr>
+        }
+    </tbody>
+</table>
